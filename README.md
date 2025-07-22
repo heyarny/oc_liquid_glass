@@ -1,9 +1,10 @@
 # OneClient Liquid Glass
 
-A Flutter package for creating stunning liquid glass droplet effects with realistic refraction, blur, and lighting. Built with GPU-accelerated fragment shaders for smooth 60fps performance.
+A Flutter package for creating stunning liquid glass droplet effects with realistic refraction, blur, and lighting. Built with GPU-accelerated fragment shaders for smooth performance.
 
 ## Features
 
+- 🚀 **No Dependencies**: Pure Flutter implementation with zero external dependencies
 - 🌟 **Realistic Glass Effects**: Refraction, blur, and specular highlights
 - ⚡ **GPU Accelerated**: Fragment shader-based rendering for optimal performance
 - 🎨 **Highly Customizable**: Fine-tune all visual parameters
@@ -12,7 +13,7 @@ A Flutter package for creating stunning liquid glass droplet effects with realis
 
 ## Preview
 
-![Liquid Glass Demo](screenshots/demo.gif)
+![Liquid Glass Demo](https://raw.githubusercontent.com/heyarny/oc_liquid_glass/refs/heads/main/screenshots/demo.gif)
 
 ## Installation
 
@@ -20,7 +21,7 @@ Add this to your package's `pubspec.yaml` file:
 
 ```yaml
 dependencies:
-  oc_liquid_glass: ^1.0.0
+  oc_liquid_glass: ^0.1.0
 ```
 
 Then run:
