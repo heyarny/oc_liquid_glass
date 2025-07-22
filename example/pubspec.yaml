@@ -1,0 +1,22 @@
+name: oc_liquid_glass_example
+description: A demonstration app for the OC Liquid Glass package
+version: 1.0.0+1
+publish_to: none
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+  flutter: ">=3.32.5"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  oc_liquid_glass:
+    path: ../
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+
+flutter:
+  uses-material-design: true

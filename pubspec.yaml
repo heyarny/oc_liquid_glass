@@ -1,0 +1,42 @@
+name: oc_liquid_glass
+description: A Flutter package for creating realistic liquid glass droplet effects with GPU-accelerated shaders featuring refraction, blur, and lighting.
+version: 0.1.0
+homepage: https://github.com/OCasares/oc_liquid_glass
+repository: https://github.com/OCasares/oc_liquid_glass
+
+screenshots:
+  - description: "An example of the liquid glass effect in action"
+    path: screenshots/example.png  
+
+topics:
+  - effects
+  - shader
+  - visual-effects
+  - liquid-glass
+  - apple
+
+funding:
+ - https://buymeacoffee.com/heyarny
+
+# Only platforms that support Impeller Engine.
+platforms:
+  macos:
+  ios:
+  android:
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+  flutter: ">=3.32.5"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+
+flutter:
+  shaders:
+    - shaders/liquid_glass.frag
