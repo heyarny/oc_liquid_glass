@@ -225,7 +225,7 @@ Stack(
 
 ## Fun Fact
 
-This widget & shader was created and improved using AI, OpenAI o3, o4mini and Claude Sonnet 4.
+This widget & shader was created and improved using AI: OpenAI (o3, o4-mini-high) and Claude Sonnet 4.
 
 ## License
 
