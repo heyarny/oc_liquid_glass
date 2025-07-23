@@ -8,6 +8,7 @@ A Flutter package for creating stunning liquid glass droplet effects with realis
 - 🌟 **Realistic Glass Effects**: Refraction, blur, and specular highlights
 - ⚡ **GPU Accelerated**: Fragment shader-based rendering for optimal performance
 - 🎨 **Highly Customizable**: Fine-tune all visual parameters
+- 🎨 **Individual Colors**: Set unique colors for each liquid glass in a group
 - 📱 **Production Ready**: Smooth animations and responsive design
 - 🔧 **Easy Integration**: Simple widget-based API
 
@@ -219,9 +220,12 @@ Stack(
 
 ## Performance Tips
 
-- Limit to 4 glass shapes per group for optimal performance
+- Limit to 4 glass shapes per group for optimal performance and limits in Flutters fragment shaders
 - Use `enabled: false` to temporarily disable effects
-- Consider device capabilities when setting blur radius
+
+## Fun Fact
+
+This widget & shader was created and improved using AI, OpenAI o3, o4mini and Claude Sonnet 4.
 
 ## License
 
