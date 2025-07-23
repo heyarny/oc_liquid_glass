@@ -10,7 +10,9 @@ A Flutter package for creating stunning liquid glass droplet effects with realis
 - 🎨 **Highly Customizable**: Fine-tune all visual parameters
 - 🎨 **Individual Colors**: Set unique colors for each liquid glass in a group
 - 📱 **Production Ready**: Smooth animations and responsive design
-- 🔧 **Easy Integration**: Simple widget-based API
+- � **Scrollable Support**: Fully supported when used inside scrollable widgets
+- 🎭 **Modal Route Animation**: Supported when used in modal route animations
+- �🔧 **Easy Integration**: Simple widget-based API
 
 ## Preview
 
@@ -218,10 +220,11 @@ Stack(
 )
 ```
 
-## Performance Tips
+## Limitations
 
-- Limit to 4 glass shapes per group for optimal performance and limits in Flutters fragment shaders
-- Use `enabled: false` to temporarily disable effects
+- Works only on platforms that support Impeller engine
+- Grouped shapes limited to 4 shapes within one group due to shader limitations of Flutter (bug?)
+- Android emulator upside down bug is not on stable channel: https://github.com/flutter/flutter/issues/169429
 
 ## Fun Fact
 
