@@ -1,8 +1,8 @@
 name: oc_liquid_glass
 description: A Flutter package for creating realistic liquid glass droplet effects with GPU-accelerated shaders featuring refraction, blur, and lighting.
-version: 0.1.1
-homepage: https://github.com/OCasares/oc_liquid_glass
-repository: https://github.com/OCasares/oc_liquid_glass
+version: 0.1.2
+homepage: https://github.com/heyarny/oc_liquid_glass
+repository: https://github.com/heyarny/oc_liquid_glass
 
 screenshots:
   - description: "An example of the liquid glass effect in action"
