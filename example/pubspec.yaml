@@ -4,12 +4,15 @@ version: 1.0.0+1
 publish_to: none
 
 environment:
-  sdk: '>=3.0.0 <4.0.0'
+  sdk: ">=3.0.0 <4.0.0"
   flutter: ">=3.32.5"
 
 dependencies:
   flutter:
     sdk: flutter
+
+  flutter_displaymode: ^0.6.0
+  rxdart: ^0.28.0
   oc_liquid_glass:
     path: ../
 
