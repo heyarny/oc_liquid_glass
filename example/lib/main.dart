@@ -33,7 +33,7 @@ class _LiquidGlassDemoState extends State<LiquidGlassDemo> {
   double _blurRadius = 2.0;
   double _specStrength = 4.0;
   double _blendPx = 20.0;
-  
+
   // Positions for draggable widgets
   Offset _position1 = const Offset(50, 100);
   Offset _position2 = const Offset(320, 200);
@@ -64,7 +64,6 @@ class _LiquidGlassDemoState extends State<LiquidGlassDemo> {
               ),
               child: CustomPaint(
                 painter: GridPainter(),
-
                 child: OCLiquidGlassGroup(
                   settings: OCLiquidGlassSettings(
                     blendPx: _blendPx,
@@ -75,12 +74,10 @@ class _LiquidGlassDemoState extends State<LiquidGlassDemo> {
                     specWidth: 2,
                     specPower: 10,
                   ),
-
                   child: LayoutBuilder(
                     builder: (context, constraints) {
                       return Stack(
                         children: [
-                          
                           // Glass droplet 1
                           Positioned(
                             left: _position1.dx,
@@ -89,8 +86,10 @@ class _LiquidGlassDemoState extends State<LiquidGlassDemo> {
                               onPanUpdate: (details) {
                                 setState(() {
                                   _position1 = Offset(
-                                    (_position1.dx + details.delta.dx).clamp(0.0, constraints.maxWidth - 250),
-                                    (_position1.dy + details.delta.dy).clamp(0.0, constraints.maxHeight - 80),
+                                    (_position1.dx + details.delta.dx)
+                                        .clamp(0.0, constraints.maxWidth - 250),
+                                    (_position1.dy + details.delta.dy)
+                                        .clamp(0.0, constraints.maxHeight - 80),
                                   );
                                 });
                               },
@@ -103,7 +102,7 @@ class _LiquidGlassDemoState extends State<LiquidGlassDemo> {
                               ),
                             ),
                           ),
-                          
+
                           // Glass droplet 2
                           Positioned(
                             left: _position2.dx,
@@ -112,8 +111,10 @@ class _LiquidGlassDemoState extends State<LiquidGlassDemo> {
                               onPanUpdate: (details) {
                                 setState(() {
                                   _position2 = Offset(
-                                    (_position2.dx + details.delta.dx).clamp(0.0, constraints.maxWidth - 100),
-                                    (_position2.dy + details.delta.dy).clamp(0.0, constraints.maxHeight - 100),
+                                    (_position2.dx + details.delta.dx)
+                                        .clamp(0.0, constraints.maxWidth - 100),
+                                    (_position2.dy + details.delta.dy).clamp(
+                                        0.0, constraints.maxHeight - 100),
                                   );
                                 });
                               },
@@ -126,7 +127,7 @@ class _LiquidGlassDemoState extends State<LiquidGlassDemo> {
                               ),
                             ),
                           ),
-                          
+
                           // Glass droplet 3
                           Positioned(
                             left: _position3.dx,
@@ -135,8 +136,10 @@ class _LiquidGlassDemoState extends State<LiquidGlassDemo> {
                               onPanUpdate: (details) {
                                 setState(() {
                                   _position3 = Offset(
-                                    (_position3.dx + details.delta.dx).clamp(0.0, constraints.maxWidth - 80),
-                                    (_position3.dy + details.delta.dy).clamp(0.0, constraints.maxHeight - 120),
+                                    (_position3.dx + details.delta.dx)
+                                        .clamp(0.0, constraints.maxWidth - 80),
+                                    (_position3.dy + details.delta.dy).clamp(
+                                        0.0, constraints.maxHeight - 120),
                                   );
                                 });
                               },
@@ -148,7 +151,7 @@ class _LiquidGlassDemoState extends State<LiquidGlassDemo> {
                               ),
                             ),
                           ),
-                          
+
                           // Glass droplet 4
                           Positioned(
                             left: _position4.dx,
@@ -157,8 +160,10 @@ class _LiquidGlassDemoState extends State<LiquidGlassDemo> {
                               onPanUpdate: (details) {
                                 setState(() {
                                   _position4 = Offset(
-                                    (_position4.dx + details.delta.dx).clamp(0.0, constraints.maxWidth - 60),
-                                    (_position4.dy + details.delta.dy).clamp(0.0, constraints.maxHeight - 60),
+                                    (_position4.dx + details.delta.dx)
+                                        .clamp(0.0, constraints.maxWidth - 60),
+                                    (_position4.dy + details.delta.dy)
+                                        .clamp(0.0, constraints.maxHeight - 60),
                                   );
                                 });
                               },
@@ -179,20 +184,21 @@ class _LiquidGlassDemoState extends State<LiquidGlassDemo> {
               ),
             ),
           ),
-          
+
           // Controls
           Container(
             padding: const EdgeInsets.all(16),
             child: Column(
               children: [
-                Text('Refraction Strength: ${_refractStrength.toStringAsFixed(3)}'),
+                Text(
+                    'Refraction Strength: ${_refractStrength.toStringAsFixed(3)}'),
                 Slider(
                   value: _refractStrength,
                   min: -0.2,
                   max: 0.2,
-                  onChanged: (value) => setState(() => _refractStrength = value),
+                  onChanged: (value) =>
+                      setState(() => _refractStrength = value),
                 ),
-                
                 Text('Blur Radius: ${_blurRadius.toStringAsFixed(1)}'),
                 Slider(
                   value: _blurRadius,
@@ -200,7 +206,6 @@ class _LiquidGlassDemoState extends State<LiquidGlassDemo> {
                   max: 20,
                   onChanged: (value) => setState(() => _blurRadius = value),
                 ),
-                
                 Text('Specular Strength: ${_specStrength.toStringAsFixed(1)}'),
                 Slider(
                   value: _specStrength,
@@ -208,7 +213,6 @@ class _LiquidGlassDemoState extends State<LiquidGlassDemo> {
                   max: 5,
                   onChanged: (value) => setState(() => _specStrength = value),
                 ),
-                
                 Text('Blend Pixels: ${_blendPx.toStringAsFixed(1)}'),
                 Slider(
                   value: _blendPx,
@@ -233,12 +237,12 @@ class GridPainter extends CustomPainter {
       ..strokeWidth = 1.5;
 
     const gridSize = 30.0;
-    
+
     // Draw vertical lines
     for (double x = 0; x < size.width; x += gridSize) {
       canvas.drawLine(Offset(x, 0), Offset(x, size.height), paint);
     }
-    
+
     // Draw horizontal lines
     for (double y = 0; y < size.height; y += gridSize) {
       canvas.drawLine(Offset(0, y), Offset(size.width, y), paint);

@@ -93,7 +93,6 @@ class OCLiquidGlassSettings {
       lightbandColor: lightbandColor ?? this.lightbandColor,
     );
   }
-
 }
 
 /// Simplified shape data structure used to pass geometry information to the shader.
@@ -110,7 +109,7 @@ class ShapeData {
 /// Container widget that manages multiple liquid glass shapes and applies the shader effect.
 /// This widget loads the fragment shader and creates a render layer that collects
 /// all LiquidGlass children and applies the unified glass effect to them.
-/// 
+///
 /// Usage: Wrap your content with LiquidGlassGroup, then add LiquidGlass widgets
 /// anywhere in the child tree to create glass droplets.
 class OCLiquidGlassGroup extends StatefulWidget {
@@ -200,7 +199,7 @@ class _LiquidGlassGroupRenderObject extends SingleChildRenderObjectWidget {
     final route = ModalRoute.of(ctx);
     if (route != null) {
       rb.setRepaintSources(
-        primary:   route.animation,          // this route’s own movement
+        primary: route.animation, // this route’s own movement
         secondary: route.secondaryAnimation, // movement of any route above
       );
     }
@@ -213,32 +212,30 @@ class _LiquidGlassGroupRenderObject extends SingleChildRenderObjectWidget {
 }
 
 /// The core render object that handles the liquid glass effect.
-/// 
+///
 /// This is where the magic happens:
 /// 1. Collects geometry data from all LiquidGlass children in the widget tree
 /// 2. Converts the geometry to shader uniforms (GPU-readable parameters)
 /// 3. Applies the fragment shader as a backdrop filter to create the glass effect
-/// 
+///
 /// The shader receives information about up to 4 glass shapes and renders them
 /// with realistic refraction, blur, and lighting effects.
 class _RenderLiquidGlassGroup extends RenderProxyBox {
-
   static const int maxRects = 4; // Maximum number of glass shapes supported
 
   Animation<double>? _primary;
   Animation<double>? _secondary;
   ScrollPosition? _scrollPosition;
 
-  _RenderLiquidGlassGroup({
-    required double devicePixelRatio,
-    required FragmentShader shader,
-    required OCLiquidGlassSettings settings,
-    ScrollPosition? position
-  })  : _devicePixelRatio = devicePixelRatio,
+  _RenderLiquidGlassGroup(
+      {required double devicePixelRatio,
+      required FragmentShader shader,
+      required OCLiquidGlassSettings settings,
+      ScrollPosition? position})
+      : _devicePixelRatio = devicePixelRatio,
         _shader = shader,
         _settings = settings,
-        _scrollPosition = position
-  {
+        _scrollPosition = position {
     _scrollPosition?.addListener(_onScroll);
   }
 
@@ -269,7 +266,7 @@ class _RenderLiquidGlassGroup extends RenderProxyBox {
   }
 
   final FragmentShader _shader;                        // The compiled shader program
-  final Set<_RenderLiquidGlass> registeredShapes = {}; // All glass shapes in the widget tree
+  final Set<RenderLiquidGlass> registeredShapes = {};  // All glass shapes in the widget tree
 
   // Called by the widget whenever the route hierarchy may have changed
   void setRepaintSources({
@@ -288,7 +285,7 @@ class _RenderLiquidGlassGroup extends RenderProxyBox {
 
   // Clean-up when the render object leaves the tree
   void detachRepaintSources() {
-    _primary  ?.removeListener(markNeedsPaint);
+    _primary?.removeListener(markNeedsPaint);
     _secondary?.removeListener(markNeedsPaint);
     _primary = _secondary = null;
     _scrollPosition?.removeListener(_onScroll);
@@ -392,8 +389,8 @@ class _RenderLiquidGlassGroup extends RenderProxyBox {
       ..setFloat(idx++, _settings.lightbandColor.b)              // Band blue
       
       // Anti-aliasing and shape count
-      ..setFloat(idx++, 1.0 * _devicePixelRatio)  // 1px anti-aliasing
-      ..setFloat(idx++, shapes.length.toDouble());           // Number of shapes
+      ..setFloat(idx++, 1.0 * _devicePixelRatio) // 1px anti-aliasing
+      ..setFloat(idx++, shapes.length.toDouble()); // Number of shapes
 
     // STEP 3: Pass individual shape data to shader (max 4 shapes supported)
     for (var i = 0; i < shapes.length && i < maxRects; i++) {
@@ -448,11 +445,11 @@ class _RenderLiquidGlassGroup extends RenderProxyBox {
 }
 
 /// Widget that wraps any child to make it appear as a liquid glass droplet.
-/// 
+///
 /// This is the user-facing widget - simply wrap any widget with LiquidGlass
 /// and it will get the glass effect applied to it. The widget must be inside
 /// a LiquidGlassGroup to work properly.
-/// 
+///
 /// The borderRadius parameter controls how rounded the glass shape appears.
 /// Note: The radius is automatically clamped to half of the smaller dimension
 /// (min(width/2, height/2)) to ensure valid geometry.
@@ -483,10 +480,10 @@ class OCLiquidGlass extends SingleChildRenderObjectWidget {
 
   @override
   createRenderObject(BuildContext context) =>
-      _RenderLiquidGlass(enabled, borderRadius, color);
+      RenderLiquidGlass(enabled, borderRadius, color);
 
   @override
-  void updateRenderObject(BuildContext context, _RenderLiquidGlass renderObject) {
+  void updateRenderObject(BuildContext context, RenderLiquidGlass renderObject) {
     renderObject
       ..enabled = enabled
       ..color = color
@@ -496,45 +493,40 @@ class OCLiquidGlass extends SingleChildRenderObjectWidget {
   @override
   Widget? get child {
     // Adjust the shadow offset if the background is translucent.
-    final shadow = this.shadow != null ?
-      this.shadow?.copyWith(
-        blurStyle: BlurStyle.outer,
-        offset: const Offset(0, 0),
-      ) : this.shadow;
+    final shadow = this.shadow != null
+        ? this.shadow?.copyWith(
+              blurStyle: BlurStyle.outer,
+              offset: const Offset(0, 0),
+            )
+        : this.shadow;
 
     return Container(
-      clipBehavior: Clip.antiAlias,
-      width: width,
-      height: height,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(borderRadius),
-        boxShadow: shadow != null ? [shadow] : null,
-      ),
-      child: super.child
-    );
+        width: width,
+        height: height,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(borderRadius),
+          boxShadow: shadow != null ? [shadow] : null,
+        ),
+        child: super.child);
   }
 }
 
 /// The render object for individual glass shapes.
-/// 
+///
 /// This render object:
 /// 1. Automatically registers itself with the parent LiquidGlassLayer when attached
 /// 2. Provides its geometry (size, position, border radius) to the shader system
 /// 3. Unregisters itself when removed from the widget tree
 /// 4. Can be enabled/disabled to control whether the glass effect is applied
-/// 
+///
 /// It acts as a proxy box, meaning it doesn't change the layout of its child.
-class _RenderLiquidGlass extends RenderProxyBox {
+class RenderLiquidGlass extends RenderProxyBox {
   bool _enabled;
   double _borderRadius;
   Color _color;
-  
-  _RenderLiquidGlass(
-    this._enabled,
-    this._borderRadius,
-    this._color
-  );
-  
+
+  RenderLiquidGlass(this._enabled, this._borderRadius, this._color);
+
   /// Whether the glass effect is enabled for this shape
   bool get enabled => _enabled;
   set enabled(bool value) {
