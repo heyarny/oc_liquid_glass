@@ -13,6 +13,15 @@ A Flutter package for creating stunning liquid glass droplet effects with realis
 - � **Scrollable Support**: Fully supported when used inside scrollable widgets
 - 🎭 **Modal Route Animation**: Supported when used in modal route animations
 - �🔧 **Easy Integration**: Simple widget-based API
+- 🔢 **Unlimited Droplets**: Create as many droplets as you want (performance degrades with the amount of effects)
+
+
+## Limitations
+
+- Works only on platforms that support Impeller engine
+- Grouped shapes limited to 4 shapes within one group due to shader limitations of Flutter (bug?)
+- Android emulator upside down bug is not on stable channel: https://github.com/flutter/flutter/issues/169429
+
 
 ## Preview
 
@@ -102,33 +111,33 @@ Stack(
 
 ### OCLiquidGlassSettings Parameters
 
-| Parameter | Type | Default | Range | Description |
-|-----------|------|---------|-------|-------------|
-| `blendPx` | `double` | `5` | `0+` | Edge blending distance in pixels for smooth transitions |
-| `refractStrength` | `double` | `-0.06` | `-1.0` to `1.0` | Strength of light refraction (negative = concave lens) |
-| `distortFalloffPx` | `double` | `45` | `0+` | Distance over which distortion effect fades out |
-| `distortExponent` | `double` | `4` | `1+` | Controls how sharply distortion falls off (higher = sharper) |
-| `blurRadiusPx` | `double` | `0` | `0+` | Base blur radius applied to the glass area |
-| `specAngle` | `double` | `4` | `0+` | Light source angle for specular highlights |
-| `specStrength` | `double` | `20.0` | `0+` | Intensity of specular highlights |
-| `specPower` | `double` | `100` | `1+` | Sharpness of specular highlights (higher = sharper) |
-| `specWidth` | `double` | `10` | `0+` | Specular width in pixels |
-| `lightbandOffsetPx` | `double` | `10` | `0+` | Distance from edge where light band appears |
-| `lightbandWidthPx` | `double` | `30` | `0+` | Width of the light band effect |
-| `lightbandStrength` | `double` | `0.9` | `0` to `1.0` | Intensity of the light band |
-| `lightbandColor` | `Color` | `Colors.white` | Any color | Color of the light band |
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `blendPx` | `double` | Edge blending distance in pixels for smooth transitions |
+| `refractStrength` | `double` | Strength of light refraction (negative = concave lens) |
+| `distortFalloffPx` | `double` | Distance over which distortion effect fades out |
+| `distortExponent` | `double` | Controls how sharply distortion falls off (higher = sharper) |
+| `blurRadiusPx` | `double` | Base blur radius applied to the glass area |
+| `specAngle` | `double` | Light source angle for specular highlights |
+| `specStrength` | `double` | Intensity of specular highlights |
+| `specPower` | `double` | Sharpness of specular highlights (higher = sharper) |
+| `specWidth` | `double` | Specular width in pixels |
+| `lightbandOffsetPx` | `double` | Distance from edge where light band appears |
+| `lightbandWidthPx` | `double` | Width of the light band effect |
+| `lightbandStrength` | `double` | Intensity of the light band |
+| `lightbandColor` | `Color` | Color of the light band |
 
 ### OCLiquidGlass Widget Parameters
 
-| Parameter | Type | Default | Description |
-|-----------|------|---------|-------------|
-| `enabled` | `bool` | `true` | Whether the glass effect is enabled |
-| `width` | `double?` | `null` | Width of the glass shape |
-| `height` | `double?` | `null` | Height of the glass shape |
-| `color` | `Color` | `Colors.transparent` | Tint color for the glass shape |
-| `borderRadius` | `double` | `0.0` | Border radius (clamped to half of smaller dimension) |
-| `shadow` | `BoxShadow?` | `null` | Optional shadow effect |
-| `child` | `Widget?` | `null` | Child widget to display inside the glass |
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `enabled` | `bool` | Whether the glass effect is enabled |
+| `width` | `double?` | Width of the glass shape |
+| `height` | `double?` | Height of the glass shape |
+| `color` | `Color` | Tint color for the glass shape |
+| `borderRadius` | `double` | Border radius (clamped to half of smaller dimension) |
+| `shadow` | `BoxShadow?` | Optional shadow effect |
+| `child` | `Widget?` | Child widget to display inside the glass |
 
 ### Multiple Glass Droplets Example
 
@@ -219,12 +228,6 @@ Stack(
   ],
 )
 ```
-
-## Limitations
-
-- Works only on platforms that support Impeller engine
-- Grouped shapes limited to 4 shapes within one group due to shader limitations of Flutter (bug?)
-- Android emulator upside down bug is not on stable channel: https://github.com/flutter/flutter/issues/169429
 
 ## Fun Fact
 
