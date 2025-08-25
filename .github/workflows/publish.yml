@@ -1,18 +1,26 @@
 name: Publish to pub.dev
 
 on:
-  push:
-    tags:
-    # must align with the tag-pattern configured on pub.dev, often just replace
-      # {{version}} with [0-9]+.[0-9]+.[0-9]+
-    - 'v[0-9]+.[0-9]+.[0-9]+' # tag-pattern on pub.dev: 'v{{version}}'
   workflow_dispatch:
 
-# Publish using the reusable workflow from dart-lang.
+# Publish using custom workflow
 jobs:
   publish:
     permissions:
       id-token: write # Required for authentication using OIDC
-    uses: dart-lang/setup-dart/.github/workflows/publish.yml@v1
-    # with:
-    #   working-directory: path/to/package/within/repository
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: dart-lang/setup-dart@v1
+
+      # Install dependencies
+      - name: Install dependencies
+        run: dart pub get
+      
+      # Format the code
+      - name: Format code
+        run: dart format lib
+      
+      # Publish to pub.dev
+      - name: Publish
+        run: dart pub publish --force
