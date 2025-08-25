@@ -15,7 +15,7 @@ jobs:
 
       # Install dependencies
       - name: Install dependencies
-        run: dart pub get
+        run: flutter pub get
       
       # Format the code
       - name: Format code
@@ -23,4 +23,4 @@ jobs:
       
       # Publish to pub.dev
       - name: Publish
-        run: dart pub publish --force
+        run: flutter pub publish --force
