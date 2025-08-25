@@ -1,10 +1,3 @@
-## [0.1.5](https://github.com/heyarny/oc_liquid_glass/compare/v0.1.4...v0.1.5) (2025-08-25)
-
-
-### Bug Fixes
-
-* enhance animation handling in LiquidGlassGroup ([6204946](https://github.com/heyarny/oc_liquid_glass/commit/620494668ce577a48e565fc05092b94126a3a790))
-
 ## [0.1.4] - 2025-08-21
 
 ### Fixes
