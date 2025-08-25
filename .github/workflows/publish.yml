@@ -14,8 +14,8 @@ jobs:
       - uses: dart-lang/setup-dart@v1
 
       # Install dependencies
-      - name: Install dependencies
-        run: flutter pub get
+      # - name: Install dependencies
+      #   run: dart pub get
       
       # Format the code
       - name: Format code
@@ -23,4 +23,4 @@ jobs:
       
       # Publish to pub.dev
       - name: Publish
-        run: flutter pub publish --force
+        run: dart pub publish --force
