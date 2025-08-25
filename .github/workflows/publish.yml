@@ -10,16 +10,20 @@ jobs:
       id-token: write # Required for authentication using OIDC
     runs-on: ubuntu-latest
     steps:
-      - name: Clone repository
-        uses: actions/checkout@v4
+      # Check out the repository
+      - uses: actions/checkout@v4
 
-      - name: Setup Dart
-        uses: dart-lang/setup-dart@v1
+      # Setup Flutter SDK and automated pub.dev credentials
+      - uses: flutter-actions/setup-flutter@v4
+      - uses: flutter-actions/setup-pubdev-credentials@v1
+
+      - name: Install dependencies
+        run: flutter pub get
 
       # Format the code
       - name: Format code
         run: dart format lib
-      
-      # Publish to pub.dev
-      - name: Publish
-        uses: dart-lang/setup-dart/.github/workflows/publish.yml@v1
+
+      # Publishing...
+      - name: Publish to pub.dev
+        run: flutter pub publish -f
