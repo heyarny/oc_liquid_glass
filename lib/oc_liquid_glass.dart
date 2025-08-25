@@ -196,13 +196,22 @@ class _LiquidGlassGroupRenderObject extends SingleChildRenderObjectWidget {
   }
 
   void _attachRouteAnimation(BuildContext ctx, _RenderLiquidGlassGroup rb) {
-    final route = ModalRoute.of(ctx);
-    if (route != null) {
-      rb.setRepaintSources(
-        primary: route.animation, // this route’s own movement
-        secondary: route.secondaryAnimation, // movement of any route above
-      );
+    final Set<Animation<double>> anims = {};
+
+    // Nearest navigator's route (could be an inner PageRoute inside the sheet)
+    final rLocal = ModalRoute.of(ctx);
+    if (rLocal?.animation != null) anims.add(rLocal!.animation!);
+    if (rLocal?.secondaryAnimation != null) anims.add(rLocal!.secondaryAnimation!);
+
+    // Root navigator's current route (e.g., the ModalBottomSheetRoute)
+    final rootNav = Navigator.maybeOf(ctx);
+    if (rootNav != null) {
+      final rRoot = ModalRoute.of(rootNav.context);
+      if (rRoot?.animation != null) anims.add(rRoot!.animation!);
+      if (rRoot?.secondaryAnimation != null) anims.add(rRoot!.secondaryAnimation!);
     }
+
+    rb.setRepaintSources(anims);
   }
 
   @override
@@ -223,8 +232,7 @@ class _LiquidGlassGroupRenderObject extends SingleChildRenderObjectWidget {
 class _RenderLiquidGlassGroup extends RenderProxyBox {
   static const int maxRects = 4; // Maximum number of glass shapes supported
 
-  Animation<double>? _primary;
-  Animation<double>? _secondary;
+  final Set<Animation<double>> _animations = {};
   ScrollPosition? _scrollPosition;
 
   _RenderLiquidGlassGroup(
@@ -269,25 +277,28 @@ class _RenderLiquidGlassGroup extends RenderProxyBox {
   final Set<RenderLiquidGlass> registeredShapes = {};  // All glass shapes in the widget tree
 
   // Called by the widget whenever the route hierarchy may have changed
-  void setRepaintSources({
-    Animation<double>? primary,
-    Animation<double>? secondary,
-  }) {
-    if (_primary != primary) {
-      _primary?.removeListener(markNeedsPaint);
-      _primary = primary?..addListener(markNeedsPaint);
+  void setRepaintSources(Set<Animation<double>> animations) {
+    // Remove listeners from old animations
+    for (final animation in _animations) {
+      animation.removeListener(markNeedsPaint);
     }
-    if (_secondary != secondary) {
-      _secondary?.removeListener(markNeedsPaint);
-      _secondary = secondary?..addListener(markNeedsPaint);
+    
+    // Clear the old set and add new animations
+    _animations.clear();
+    _animations.addAll(animations);
+    
+    // Add listeners to new animations
+    for (final animation in _animations) {
+      animation.addListener(markNeedsPaint);
     }
   }
 
   // Clean-up when the render object leaves the tree
   void detachRepaintSources() {
-    _primary?.removeListener(markNeedsPaint);
-    _secondary?.removeListener(markNeedsPaint);
-    _primary = _secondary = null;
+    for (final animation in _animations) {
+      animation.removeListener(markNeedsPaint);
+    }
+    _animations.clear();
     _scrollPosition?.removeListener(_onScroll);
   }
 
