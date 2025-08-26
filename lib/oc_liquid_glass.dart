@@ -200,15 +200,23 @@ class _LiquidGlassGroupRenderObject extends SingleChildRenderObjectWidget {
 
     // Nearest navigator's route (could be an inner PageRoute inside the sheet)
     final rLocal = ModalRoute.of(ctx);
-    if (rLocal?.animation != null) anims.add(rLocal!.animation!);
-    if (rLocal?.secondaryAnimation != null) anims.add(rLocal!.secondaryAnimation!);
+    if (rLocal?.animation != null) {
+      anims.add(rLocal!.animation!);
+    }
+    if (rLocal?.secondaryAnimation != null) {
+      anims.add(rLocal!.secondaryAnimation!);
+    }
 
     // Root navigator's current route (e.g., the ModalBottomSheetRoute)
     final rootNav = Navigator.maybeOf(ctx);
     if (rootNav != null) {
       final rRoot = ModalRoute.of(rootNav.context);
-      if (rRoot?.animation != null) anims.add(rRoot!.animation!);
-      if (rRoot?.secondaryAnimation != null) anims.add(rRoot!.secondaryAnimation!);
+      if (rRoot?.animation != null) {
+        anims.add(rRoot!.animation!);
+      }
+      if (rRoot?.secondaryAnimation != null) {
+        anims.add(rRoot!.secondaryAnimation!);
+      }
     }
 
     rb.setRepaintSources(anims);
