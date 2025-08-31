@@ -1,3 +1,11 @@
+# [0.2.0](https://github.com/heyarny/oc_liquid_glass/compare/v0.1.5...v0.2.0) (2025-08-31)
+
+
+### Features
+
+* add external repaint trigger to OCLiquidGlassGroup for improved animation control ([0bdc8ac](https://github.com/heyarny/oc_liquid_glass/commit/0bdc8acd4ee063e79a071c838906721666a473aa))
+* update example app with new background image and adjust liquid glass settings ([9368cf6](https://github.com/heyarny/oc_liquid_glass/commit/9368cf611ce36c80ef1410ccbf22c338fa650e53))
+
 ## [0.1.5](https://github.com/heyarny/oc_liquid_glass/compare/v0.1.4...v0.1.5) (2025-08-25)
 
 
