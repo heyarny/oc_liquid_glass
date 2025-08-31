@@ -33,7 +33,7 @@ Add this to your package's `pubspec.yaml` file:
 
 ```yaml
 dependencies:
-  oc_liquid_glass: ^0.1.0
+  oc_liquid_glass: ^0.1.5
 ```
 
 Then run:

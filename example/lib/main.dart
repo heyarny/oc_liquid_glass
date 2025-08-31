@@ -52,134 +52,206 @@ class _LiquidGlassDemoState extends State<LiquidGlassDemo> {
           Expanded(
             child: Container(
               decoration: const BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    Color.fromARGB(255, 18, 43, 91),
-                    Color.fromARGB(255, 42, 83, 156),
-                    Color.fromARGB(255, 134, 167, 219),
-                  ],
+                image: DecorationImage(
+                  image: AssetImage('assets/bg.png'),
+                  fit: BoxFit.cover,
                 ),
               ),
-              child: CustomPaint(
-                painter: GridPainter(),
-                child: OCLiquidGlassGroup(
-                  settings: OCLiquidGlassSettings(
-                    blendPx: _blendPx,
-                    specAngle: 0.8,
-                    refractStrength: _refractStrength,
-                    blurRadiusPx: _blurRadius,
-                    specStrength: _specStrength,
-                    specWidth: 2,
-                    specPower: 10,
-                  ),
-                  child: LayoutBuilder(
-                    builder: (context, constraints) {
-                      return Stack(
-                        children: [
-                          // Glass droplet 1
-                          Positioned(
-                            left: _position1.dx,
-                            top: _position1.dy,
-                            child: GestureDetector(
-                              onPanUpdate: (details) {
-                                setState(() {
-                                  _position1 = Offset(
-                                    (_position1.dx + details.delta.dx)
-                                        .clamp(0.0, constraints.maxWidth - 250),
-                                    (_position1.dy + details.delta.dy)
-                                        .clamp(0.0, constraints.maxHeight - 80),
-                                  );
-                                });
-                              },
-                              child: OCLiquidGlass(
-                                width: 250,
-                                height: 80,
-                                borderRadius: 40,
-                                color: Colors.amber.withAlpha(100),
-                                child: const SizedBox(),
+              child: OCLiquidGlassGroup(
+                settings: OCLiquidGlassSettings(
+                  blendPx: _blendPx,
+                  specAngle: 0.8,
+                  refractStrength: _refractStrength,
+                  distortFalloffPx: 35,
+                  blurRadiusPx: _blurRadius,
+                  specStrength: _specStrength,
+                  specWidth: 1.5,
+                  specPower: 4,
+                ),
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    return Stack(
+                      children: [
+                        // Glass droplet 1
+                        Positioned(
+                          left: _position1.dx,
+                          top: _position1.dy,
+                          child: GestureDetector(
+                            onPanUpdate: (details) {
+                              setState(() {
+                                _position1 = Offset(
+                                  (_position1.dx + details.delta.dx)
+                                      .clamp(0.0, constraints.maxWidth - 250),
+                                  (_position1.dy + details.delta.dy)
+                                      .clamp(0.0, constraints.maxHeight - 80),
+                                );
+                              });
+                            },
+                            child: OCLiquidGlass(
+                              width: 250,
+                              height: 80,
+                              borderRadius: 40,
+                              color: Colors.amber.withAlpha(100),
+                              child: const Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    Icons.star,
+                                    color: Colors.white,
+                                    size: 24,
+                                  ),
+                                  SizedBox(width: 8),
+                                  Text(
+                                    'Glass Panel',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                  SizedBox(width: 8),
+                                  Icon(
+                                    Icons.star,
+                                    color: Colors.white,
+                                    size: 24,
+                                  ),
+                                ],
                               ),
                             ),
                           ),
-
-                          // Glass droplet 2
-                          Positioned(
-                            left: _position2.dx,
-                            top: _position2.dy,
-                            child: GestureDetector(
-                              onPanUpdate: (details) {
-                                setState(() {
-                                  _position2 = Offset(
-                                    (_position2.dx + details.delta.dx)
-                                        .clamp(0.0, constraints.maxWidth - 100),
-                                    (_position2.dy + details.delta.dy).clamp(
-                                        0.0, constraints.maxHeight - 100),
-                                  );
-                                });
-                              },
-                              child: OCLiquidGlass(
-                                width: 100,
-                                height: 100,
-                                borderRadius: 50,
-                                color: Colors.lightGreen.withAlpha(220),
-                                child: const SizedBox(),
+                        ),
+              
+                        // Glass droplet 2
+                        Positioned(
+                          left: _position2.dx,
+                          top: _position2.dy,
+                          child: GestureDetector(
+                            onPanUpdate: (details) {
+                              setState(() {
+                                _position2 = Offset(
+                                  (_position2.dx + details.delta.dx)
+                                      .clamp(0.0, constraints.maxWidth - 100),
+                                  (_position2.dy + details.delta.dy).clamp(
+                                      0.0, constraints.maxHeight - 100),
+                                );
+                              });
+                            },
+                            child: OCLiquidGlass(
+                              width: 100,
+                              height: 100,
+                              borderRadius: 50,
+                              color: Colors.lightGreen.withAlpha(200),
+                              child: const Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    Icons.eco,
+                                    color: Colors.white,
+                                    size: 30,
+                                  ),
+                                  SizedBox(height: 4),
+                                  Text(
+                                    'ECO',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
                           ),
-
-                          // Glass droplet 3
-                          Positioned(
-                            left: _position3.dx,
-                            top: _position3.dy,
-                            child: GestureDetector(
-                              onPanUpdate: (details) {
-                                setState(() {
-                                  _position3 = Offset(
-                                    (_position3.dx + details.delta.dx)
-                                        .clamp(0.0, constraints.maxWidth - 80),
-                                    (_position3.dy + details.delta.dy).clamp(
-                                        0.0, constraints.maxHeight - 120),
-                                  );
-                                });
-                              },
-                              child: OCLiquidGlass(
-                                width: 80,
-                                height: 120,
-                                borderRadius: 20,
-                                child: const SizedBox(),
+                        ),
+              
+                        // Glass droplet 3
+                        Positioned(
+                          left: _position3.dx,
+                          top: _position3.dy,
+                          child: GestureDetector(
+                            onPanUpdate: (details) {
+                              setState(() {
+                                _position3 = Offset(
+                                  (_position3.dx + details.delta.dx)
+                                      .clamp(0.0, constraints.maxWidth - 80),
+                                  (_position3.dy + details.delta.dy).clamp(
+                                      0.0, constraints.maxHeight - 120),
+                                );
+                              });
+                            },
+                            child: OCLiquidGlass(
+                              width: 80,
+                              height: 120,
+                              borderRadius: 20,
+                              child: const Column(
+                                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                children: [
+                                  Icon(
+                                    Icons.favorite,
+                                    color: Colors.pink,
+                                    size: 24,
+                                  ),
+                                  Text(
+                                    '❤️',
+                                    style: TextStyle(fontSize: 20),
+                                  ),
+                                  Icon(
+                                    Icons.thumb_up,
+                                    color: Colors.blue,
+                                    size: 24,
+                                  ),
+                                ],
                               ),
                             ),
                           ),
-
-                          // Glass droplet 4
-                          Positioned(
-                            left: _position4.dx,
-                            top: _position4.dy,
-                            child: GestureDetector(
-                              onPanUpdate: (details) {
-                                setState(() {
-                                  _position4 = Offset(
-                                    (_position4.dx + details.delta.dx)
-                                        .clamp(0.0, constraints.maxWidth - 60),
-                                    (_position4.dy + details.delta.dy)
-                                        .clamp(0.0, constraints.maxHeight - 60),
-                                  );
-                                });
-                              },
-                              child: OCLiquidGlass(
-                                width: 60,
-                                height: 60,
-                                borderRadius: 30,
-                                color: Colors.black.withAlpha(150),
-                                child: const SizedBox(),
+                        ),
+              
+                        // Glass droplet 4
+                        Positioned(
+                          left: _position4.dx,
+                          top: _position4.dy,
+                          child: GestureDetector(
+                            onPanUpdate: (details) {
+                              setState(() {
+                                _position4 = Offset(
+                                  (_position4.dx + details.delta.dx)
+                                      .clamp(0.0, constraints.maxWidth - 60),
+                                  (_position4.dy + details.delta.dy)
+                                      .clamp(0.0, constraints.maxHeight - 60),
+                                );
+                              });
+                            },
+                            child: OCLiquidGlass(
+                              width: 60,
+                              height: 60,
+                              borderRadius: 30,
+                              color: Colors.black.withAlpha(150),
+                              child: const Center(
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      Icons.nights_stay,
+                                      color: Colors.white,
+                                      size: 20,
+                                    ),
+                                    Text(
+                                      'DARK',
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 8,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
                             ),
                           ),
-                        ],
-                      );
-                    },
-                  ),
+                        ),
+                      ],
+                    );
+                  },
                 ),
               ),
             ),
