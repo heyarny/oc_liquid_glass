@@ -113,12 +113,21 @@ class ShapeData {
 /// Usage: Wrap your content with LiquidGlassGroup, then add LiquidGlass widgets
 /// anywhere in the child tree to create glass droplets.
 class OCLiquidGlassGroup extends StatefulWidget {
+
+  /// Visual settings for the liquid glass shader effect.
   final OCLiquidGlassSettings settings;
+
+  /// Optional external trigger to force the group to repaint (e.g., merged animations).
+  final Listenable? repaint;
+
+  /// The child widget tree that may contain LiquidGlass widgets.
   final Widget child;
+
   const OCLiquidGlassGroup({
     super.key,
     required this.settings,
     required this.child,
+    this.repaint,
   });
 
   @override
@@ -148,6 +157,7 @@ class _OCLiquidGlassGroupState extends State<OCLiquidGlassGroup> {
     return _LiquidGlassGroupRenderObject(
       shader: _program!.fragmentShader(),
       settings: widget.settings,
+      repaint: widget.repaint,
       child: widget.child,
     );
   }
@@ -157,11 +167,17 @@ class _OCLiquidGlassGroupState extends State<OCLiquidGlassGroup> {
 /// This creates and manages the RenderLiquidGlassLayer that does the actual rendering.
 class _LiquidGlassGroupRenderObject extends SingleChildRenderObjectWidget {
   final FragmentShader shader;
+
+  /// Visual settings for the liquid glass shader effect.
   final OCLiquidGlassSettings settings;
+
+  /// External repaint trigger coming from the widget.
+  final Listenable? repaint;
 
   const _LiquidGlassGroupRenderObject({
     required this.shader,
     required this.settings,
+    this.repaint,
     super.child,
   });
 
@@ -174,6 +190,7 @@ class _LiquidGlassGroupRenderObject extends SingleChildRenderObjectWidget {
       shader: shader,
       settings: settings,
       position: position,
+      externalRepaint: repaint,
     );
 
     _attachRouteAnimation(context, renderObject);
@@ -190,21 +207,22 @@ class _LiquidGlassGroupRenderObject extends SingleChildRenderObjectWidget {
     renderObject
       ..devicePixelRatio = MediaQuery.of(context).devicePixelRatio
       ..settings = settings
-      ..scrollPosition = position;
+      ..scrollPosition = position
+      ..externalRepaint = repaint;
 
     _attachRouteAnimation(context, renderObject);
   }
 
   void _attachRouteAnimation(BuildContext ctx, _RenderLiquidGlassGroup rb) {
-    final Set<Animation<double>> anims = {};
+    final List<Listenable> listenables = [];
 
     // Nearest navigator's route (could be an inner PageRoute inside the sheet)
     final rLocal = ModalRoute.of(ctx);
     if (rLocal?.animation != null) {
-      anims.add(rLocal!.animation!);
+      listenables.add(rLocal!.animation!);
     }
     if (rLocal?.secondaryAnimation != null) {
-      anims.add(rLocal!.secondaryAnimation!);
+      listenables.add(rLocal!.secondaryAnimation!);
     }
 
     // Root navigator's current route (e.g., the ModalBottomSheetRoute)
@@ -212,14 +230,19 @@ class _LiquidGlassGroupRenderObject extends SingleChildRenderObjectWidget {
     if (rootNav != null) {
       final rRoot = ModalRoute.of(rootNav.context);
       if (rRoot?.animation != null) {
-        anims.add(rRoot!.animation!);
+        listenables.add(rRoot!.animation!);
       }
       if (rRoot?.secondaryAnimation != null) {
-        anims.add(rRoot!.secondaryAnimation!);
+        listenables.add(rRoot!.secondaryAnimation!);
       }
     }
 
-    rb.setRepaintSources(anims);
+    // Create merged listenable directly or pass null if empty
+    final mergedRouteAnimations = listenables.isNotEmpty 
+        ? Listenable.merge(listenables) 
+        : null;
+
+    rb.setRouteAnimations(mergedRouteAnimations);
   }
 
   @override
@@ -240,19 +263,35 @@ class _LiquidGlassGroupRenderObject extends SingleChildRenderObjectWidget {
 class _RenderLiquidGlassGroup extends RenderProxyBox {
   static const int maxRects = 4; // Maximum number of glass shapes supported
 
-  final Set<Animation<double>> _animations = {};
+  Listenable? _routeAnimations;
   ScrollPosition? _scrollPosition;
 
-  _RenderLiquidGlassGroup(
-      {required double devicePixelRatio,
-      required FragmentShader shader,
-      required OCLiquidGlassSettings settings,
-      ScrollPosition? position})
-      : _devicePixelRatio = devicePixelRatio,
+  /// Optional external repaint trigger (e.g., merged animations)
+  Listenable? _externalRepaint;
+
+  _RenderLiquidGlassGroup({
+    required double devicePixelRatio,
+    required FragmentShader shader,
+    required OCLiquidGlassSettings settings,
+    
+    ScrollPosition? position,
+    Listenable? externalRepaint,
+  }) : _devicePixelRatio = devicePixelRatio,
         _shader = shader,
         _settings = settings,
-        _scrollPosition = position {
+        _scrollPosition = position,
+        _externalRepaint = externalRepaint
+  {
     _scrollPosition?.addListener(_onScroll);
+    _externalRepaint?.addListener(markNeedsPaint);
+  }
+
+  // Allow updates from the element
+  set externalRepaint(Listenable? v) {
+    if (identical(v, _externalRepaint)) return;
+    _externalRepaint?.removeListener(markNeedsPaint);
+    _externalRepaint = v;
+    _externalRepaint?.addListener(markNeedsPaint);
   }
 
   // ── scroll binding ──
@@ -285,29 +324,23 @@ class _RenderLiquidGlassGroup extends RenderProxyBox {
   final Set<RenderLiquidGlass> registeredShapes = {};  // All glass shapes in the widget tree
 
   // Called by the widget whenever the route hierarchy may have changed
-  void setRepaintSources(Set<Animation<double>> animations) {
-    // Remove listeners from old animations
-    for (final animation in _animations) {
-      animation.removeListener(markNeedsPaint);
-    }
+  void setRouteAnimations(Listenable? routeAnimations) {
+    // Remove listener from old merged animations
+    _routeAnimations?.removeListener(markNeedsPaint);
     
-    // Clear the old set and add new animations
-    _animations.clear();
-    _animations.addAll(animations);
+    // Set new merged listenable
+    _routeAnimations = routeAnimations;
     
-    // Add listeners to new animations
-    for (final animation in _animations) {
-      animation.addListener(markNeedsPaint);
-    }
+    // Add listener to new merged animations
+    _routeAnimations?.addListener(markNeedsPaint);
   }
 
   // Clean-up when the render object leaves the tree
   void detachRepaintSources() {
-    for (final animation in _animations) {
-      animation.removeListener(markNeedsPaint);
-    }
-    _animations.clear();
+    _routeAnimations?.removeListener(markNeedsPaint);
+    _routeAnimations = null;
     _scrollPosition?.removeListener(_onScroll);
+    _externalRepaint?.removeListener(markNeedsPaint);
   }
 
   @override
@@ -327,6 +360,8 @@ class _RenderLiquidGlassGroup extends RenderProxyBox {
 
   @override
   void paint(PaintingContext context, Offset offset) {
+    debugPrint('LiquidGlassGroup.paint - $this');
+
     // STEP 1: Collect geometry data from all registered glass shapes
     final shapes = <ShapeData>[];
     for (var shape in registeredShapes) {
