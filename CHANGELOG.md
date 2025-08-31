@@ -1,3 +1,10 @@
+## [0.2.1](https://github.com/heyarny/oc_liquid_glass/compare/v0.2.0...v0.2.1) (2025-08-31)
+
+
+### Bug Fixes
+
+* remove debug print statement from LiquidGlassGroup paint method ([8ab6c32](https://github.com/heyarny/oc_liquid_glass/commit/8ab6c326aaec4b2eca5a084f4fb941cedafe427f))
+
 # [0.2.0](https://github.com/heyarny/oc_liquid_glass/compare/v0.1.5...v0.2.0) (2025-08-31)
 
 
