@@ -360,8 +360,6 @@ class _RenderLiquidGlassGroup extends RenderProxyBox {
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    debugPrint('LiquidGlassGroup.paint - $this');
-
     // STEP 1: Collect geometry data from all registered glass shapes
     final shapes = <ShapeData>[];
     for (var shape in registeredShapes) {
