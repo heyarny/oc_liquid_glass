@@ -1,3 +1,10 @@
+## [0.2.2](https://github.com/heyarny/oc_liquid_glass/compare/v0.2.1...v0.2.2) (2026-05-22)
+
+
+### Bug Fixes
+
+* **shader:** correct GLES backdrop sampling ([9fb1d95](https://github.com/heyarny/oc_liquid_glass/commit/9fb1d95e8f272cc7e03ef31948b55bbdf1a400d5))
+
 ## [0.2.1](https://github.com/heyarny/oc_liquid_glass/compare/v0.2.0...v0.2.1) (2025-08-31)
 
 
