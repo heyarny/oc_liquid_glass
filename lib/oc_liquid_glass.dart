@@ -366,7 +366,7 @@ class _RenderLiquidGlassGroup extends RenderProxyBox {
       // Skip shapes that aren't properly attached or have no size
       if (!shape.attached || shape.size.isEmpty) continue;
       
-      // Transform shape coordinates to screen space
+      // Transform shape coordinates to scene space.
       final transform = shape.getTransformTo(null);
       final rect = MatrixUtils.transformRect(
         transform,
@@ -390,7 +390,7 @@ class _RenderLiquidGlassGroup extends RenderProxyBox {
       return;
     }
 
-    // Calculate boudary of current render object
+    // Calculate boundary of current render object in scene space.
     final boundaryTransform = getTransformTo(null);
     final boundary = MatrixUtils.transformRect(
       boundaryTransform,

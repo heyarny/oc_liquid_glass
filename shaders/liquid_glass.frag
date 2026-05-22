@@ -72,7 +72,13 @@ out vec4 fragColor;
 /* ── Helpers ─────────────────────────────────────────────────── */
 #define R u_size
 float px(float v) { return v / R.y; }
-vec3  bg(vec2 uv){ return texture(u_texture_input, clamp(uv,0.0,1.0)).rgb; }
+vec3 bg(vec2 uv) {
+  vec2 sampleUv = clamp(uv, 0.0, 1.0);
+#ifdef IMPELLER_TARGET_OPENGLES
+  sampleUv.y = 1.0 - sampleUv.y;
+#endif
+  return texture(u_texture_input, sampleUv).rgb;
+}
 
 /* getters keep main tidy */
 vec4  getRect(int i){
@@ -99,6 +105,31 @@ float sminPoly(float a,float b,float k){
   return mix(b,a,h) - k*h*(1.0-h);
 }
 
+float unionDistance(vec2 uvCenter, int cnt, float k){
+  float dU = 0.0;
+  for(int i=0;i<MAX_RECTS;++i){
+    if(i>=cnt) break;
+    vec4 r = getRect(i);
+    vec2 hsz  = (r.zw*0.5)/R.y;
+    vec2 posN = (r.xy - 0.5*R)/R.y;
+    float d = sdRoundRect(uvCenter - posN, hsz, getCorner(i)/R.y);
+    dU = (i==0)?d:sminPoly(dU,d,k);
+  }
+  return dU;
+}
+
+vec2 unionGradient(vec2 uvCenter, int cnt, float k){
+  float eps = px(1.0);
+  vec2 dx = vec2(eps,0.0);
+  vec2 dy = vec2(0.0,eps);
+  return vec2(
+    unionDistance(uvCenter + dx, cnt, k) -
+      unionDistance(uvCenter - dx, cnt, k),
+    unionDistance(uvCenter + dy, cnt, k) -
+      unionDistance(uvCenter - dy, cnt, k)
+  );
+}
+
 /* radial blur */
 vec3 radialBlur(vec2 uv,float radiusPx){
   if(radiusPx<0.5) return bg(uv);
@@ -119,14 +150,11 @@ vec3 radialBlur(vec2 uv,float radiusPx){
 /* ── Main ────────────────────────────────────────────────────── */
 void main(){
   vec2 fragPx = FlutterFragCoord().xy;
-#ifdef IMPELLER_TARGET_OPENGLES
-  fragPx.y = R.y - fragPx.y;
-#endif
 
   /* passthrough */
   if(fragPx.x<uBounds.x||fragPx.x>uBounds.z||
      fragPx.y<uBounds.y||fragPx.y>uBounds.w){
-    fragColor = texture(u_texture_input, fragPx/R);
+    fragColor = vec4(bg(fragPx/R), 1.0);
     return;
   }
 
@@ -142,9 +170,6 @@ void main(){
   for(int i=0;i<MAX_RECTS;++i){
     if(i>=cnt){ d[i]=1e5; continue; }
     vec4 r = getRect(i);
-#ifdef IMPELLER_TARGET_OPENGLES
-    r.y = R.y - r.y;
-#endif
     vec2 hsz  = (r.zw*0.5)/R.y;
     vec2 posN = (r.xy - 0.5*R)/R.y;
     d[i]  = sdRoundRect(uvCenter - posN, hsz, getCorner(i)/R.y);
@@ -153,17 +178,11 @@ void main(){
 
   float mask = smoothstep(px(uAAPx),-px(uAAPx),dU);
 
-  vec2 grad = vec2(dFdx(dU),dFdy(dU));
-#ifdef IMPELLER_TARGET_OPENGLES
-  grad.y = -grad.y;
-#endif
+  vec2 grad = unionGradient(uvCenter,cnt,k);
   grad = normalize(grad+1e-6);
 
   vec2 off = grad * pow(smoothstep(-px(uDistortFalloffPx),0.0,dU),
                         uDistortExponent) * uRefractStrength * mask;
-#ifdef IMPELLER_TARGET_OPENGLES
-  off.y = -off.y;
-#endif
 
   vec3 glassBase = radialBlur(uv0 + off*0.6, uRadialBlurPx);
 
