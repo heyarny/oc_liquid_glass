@@ -10,7 +10,7 @@ A Flutter package for creating stunning liquid glass droplet effects with realis
 - 🎨 **Highly Customizable**: Fine-tune all visual parameters
 - 🎨 **Individual Colors**: Set unique colors for each liquid glass in a group
 - 📱 **Production Ready**: Smooth animations and responsive design
-- � **Scrollable Support**: Fully supported when used inside scrollable widgets
+- � **Scrollable Support**: Supported when used inside scrollable widgets
 - 🎭 **Modal Route Animation**: Supported when used in modal route animations
 - �🔧 **Easy Integration**: Simple widget-based API
 - 🔢 **Unlimited Droplets**: Create as many droplets as you want (performance degrades with the amount of effects)
@@ -19,8 +19,7 @@ A Flutter package for creating stunning liquid glass droplet effects with realis
 ## Limitations
 
 - Works only on platforms that support Impeller engine
-- Grouped shapes limited to 4 shapes within one group due to shader limitations of Flutter (bug?)
-- Android emulator upside down bug is not on stable channel: https://github.com/flutter/flutter/issues/169429
+- Grouped shapes are limited to 4 shapes within one group
 
 
 ## Preview
@@ -33,7 +32,7 @@ Add this to your package's `pubspec.yaml` file:
 
 ```yaml
 dependencies:
-  oc_liquid_glass: ^0.1.5
+  oc_liquid_glass: ^0.2.2
 ```
 
 Then run:
@@ -76,6 +75,20 @@ Stack(
     ),
   ],
 )
+```
+
+### Precaching the Shader
+
+The shader loads asynchronously the first time an `OCLiquidGlassGroup` appears.
+For transient UI such as toasts, dialogs, or bottom sheets, preload it before the
+first glass widget is shown:
+
+```dart
+@override
+void initState() {
+  super.initState();
+  OCLiquidGlassGroup.precacheShader();
+}
 ```
 
 ### Advanced Configuration
@@ -228,10 +241,6 @@ Stack(
   ],
 )
 ```
-
-## Fun Fact
-
-This widget & shader was created and improved using AI: OpenAI (o3, o4-mini-high) and Claude Sonnet 4.
 
 ## License
 
