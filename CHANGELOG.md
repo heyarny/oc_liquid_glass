@@ -1,3 +1,10 @@
+# [0.3.0](https://github.com/heyarny/oc_liquid_glass/compare/v0.2.2...v0.3.0) (2026-06-25)
+
+
+### Features
+
+* add shader precaching and backdrop fallback ([643ee4f](https://github.com/heyarny/oc_liquid_glass/commit/643ee4f769f4ef6be14327270b3e3248ad59a822))
+
 ## [0.2.2](https://github.com/heyarny/oc_liquid_glass/compare/v0.2.1...v0.2.2) (2026-05-22)
 
 
