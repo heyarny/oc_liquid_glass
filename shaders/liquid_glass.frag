@@ -35,6 +35,14 @@ precision highp float;
 #define PI         3.14159265359
 #define BLUR_STEPS 12          // per ring
 #define MAX_RECTS  4           // ← now five rectangles
+// Native/platform views can sample as transparent in backdrop shaders. Only
+// refract pixels that are opaque enough to trust; otherwise use the tint color.
+#define BACKDROP_USABLE_ALPHA_THRESHOLD 0.5
+// Fallback opacity preserves readability when refraction/blur cannot sample
+// native/platform views.
+#define BACKDROP_FALLBACK_ALPHA 0.95
+// Must stay in sync with any Dart-side backdrop clipping inflation.
+#define REFRACTION_SAMPLE_SCALE 0.6
 
 /* ── Global uniforms ─────────────────────────────────────────── */
 uniform vec2   u_size;             // (w,h)  px
@@ -72,12 +80,19 @@ out vec4 fragColor;
 /* ── Helpers ─────────────────────────────────────────────────── */
 #define R u_size
 float px(float v) { return v / R.y; }
-vec3 bg(vec2 uv) {
+vec4 rawBg(vec2 uv) {
   vec2 sampleUv = clamp(uv, 0.0, 1.0);
 #ifdef IMPELLER_TARGET_OPENGLES
   sampleUv.y = 1.0 - sampleUv.y;
 #endif
-  return texture(u_texture_input, sampleUv).rgb;
+  return texture(u_texture_input, sampleUv);
+}
+vec4 glassBg(vec2 uv) {
+  return rawBg(uv);
+}
+vec4 premultiply(vec4 color) {
+  vec4 clamped = clamp(color, 0.0, 1.0);
+  return vec4(clamped.rgb * clamped.a, clamped.a);
 }
 
 /* getters keep main tidy */
@@ -131,16 +146,16 @@ vec2 unionGradient(vec2 uvCenter, int cnt, float k){
 }
 
 /* radial blur */
-vec3 radialBlur(vec2 uv,float radiusPx){
-  if(radiusPx<0.5) return bg(uv);
-  vec3 sum = bg(uv);
+vec4 radialBlur(vec2 uv,float radiusPx){
+  if(radiusPx<0.5) return glassBg(uv);
+  vec4 sum = glassBg(uv);
   float nr = px(radiusPx);
   int cnt  = 1;
   for(int ring=1; ring<=4; ++ring){
     float rad = nr * float(ring)/4.0;
     for(int j=0; j<BLUR_STEPS; ++j){
       float a = float(j)*2.0*PI/float(BLUR_STEPS);
-      sum += bg(uv + vec2(cos(a),sin(a))*rad);
+      sum += glassBg(uv + vec2(cos(a),sin(a))*rad);
       cnt++;
     }
   }
@@ -154,7 +169,7 @@ void main(){
   /* passthrough */
   if(fragPx.x<uBounds.x||fragPx.x>uBounds.z||
      fragPx.y<uBounds.y||fragPx.y>uBounds.w){
-    fragColor = vec4(bg(fragPx/R), 1.0);
+    fragColor = vec4(0.0);
     return;
   }
 
@@ -184,31 +199,40 @@ void main(){
   vec2 off = grad * pow(smoothstep(-px(uDistortFalloffPx),0.0,dU),
                         uDistortExponent) * uRefractStrength * mask;
 
-  vec3 glassBase = radialBlur(uv0 + off*0.6, uRadialBlurPx);
+  vec4 glassBase = radialBlur(uv0 + off*REFRACTION_SAMPLE_SCALE, uRadialBlurPx);
 
   /* tint blend (soft-max) */
   vec3  accum = vec3(0.0);
+  float alphaAccum = 0.0;
   float wSum  = 0.0;
   for(int i=0;i<MAX_RECTS;++i){
     if(i>=cnt) break;
     float w = exp(-d[i]/k);
     vec4 tint = getTint(i);          // rgb + strength (a)
-    accum += mix(glassBase, tint.rgb, tint.a) * w;
+    bool backdropIsUsable = glassBase.a >= BACKDROP_USABLE_ALPHA_THRESHOLD;
+    vec3 shapeColor = backdropIsUsable
+        ? mix(glassBase.rgb, tint.rgb, tint.a)
+        : tint.rgb;
+    float shapeAlpha = backdropIsUsable
+        ? 1.0
+        : max(tint.a, BACKDROP_FALLBACK_ALPHA);
+    accum += shapeColor * w;
+    alphaAccum += shapeAlpha * w;
     wSum  += w;
   }
-  vec3 glass = accum / wSum;
+  vec4 glass = vec4(accum / wSum, alphaAccum / wSum);
 
   /* specular rim */
   vec3 N3 = normalize(vec3(grad,0.6));
   vec3 L1 = normalize(vec3(cos(uSpecAngle), sin(uSpecAngle), 0.5));
   vec3 L2 = normalize(vec3(-cos(uSpecAngle),-sin(uSpecAngle),0.5));
   float rim = smoothstep(px(-uSpecWidthPx),0.0,dU);
-  glass += (pow(max(dot(N3,L1),0.0),uSpecPower) +
+  glass.rgb += (pow(max(dot(N3,L1),0.0),uSpecPower) +
             pow(max(dot(N3,L2),0.0),uSpecPower)) * uSpecStrength * rim;
 
   /* light band */
   float lb = smoothstep(0.0,px(uLightbandWidthPx),dU+px(uLightbandOffsetPx));
-  glass += uLightbandColor * lb * uLightbandStrength;
+  glass.rgb += uLightbandColor * lb * uLightbandStrength;
 
-  fragColor = vec4(mix(bg(uv0),glass,mask),1.0);
+  fragColor = premultiply(vec4(glass.rgb, glass.a * mask));
 }

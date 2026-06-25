@@ -3,19 +3,17 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
-/**
- * LiquidGlass Shader Example - Creates realistic glass droplet effects
- * 
- * This file demonstrates a complex shader-based implementation that creates
- * liquid glass droplets with realistic refraction, blur, and lighting effects.
- * The system uses Flutter's FragmentShader API to apply GPU-accelerated effects.
- * 
- * Key Components:
- * - LiquidGlassSettings: Configuration for visual parameters
- * - LiquidGlassGroup: Container that manages multiple glass shapes
- * - LiquidGlass: Individual glass droplet widget
- * - Custom RenderObjects: Handle the low-level rendering and shader application
- */
+// LiquidGlass Shader Example - Creates realistic glass droplet effects
+//
+// This file demonstrates a complex shader-based implementation that creates
+// liquid glass droplets with realistic refraction, blur, and lighting effects.
+// The system uses Flutter's FragmentShader API to apply GPU-accelerated effects.
+//
+// Key Components:
+// - LiquidGlassSettings: Configuration for visual parameters
+// - LiquidGlassGroup: Container that manages multiple glass shapes
+// - LiquidGlass: Individual glass droplet widget
+// - Custom RenderObjects: Handle the low-level rendering and shader application
 
 /// Configuration class that holds all visual parameters for the liquid glass shader effect.
 /// These parameters control various aspects like refraction, blur, lighting, and color.
@@ -104,6 +102,42 @@ class ShapeData {
   final double borderRadius; // Border radius (clamped to half of smaller dimension)
   final Color color; // Optional tint color for the glass shape
   ShapeData(this.center, this.size, this.borderRadius, this.color);
+
+  Rect get rect => Rect.fromCenter(
+        center: center,
+        width: size.width,
+        height: size.height,
+      );
+}
+
+class _OCLiquidGlassShaderCache {
+  static const String _shaderAsset =
+      'packages/oc_liquid_glass/shaders/liquid_glass.frag';
+
+  static FragmentProgram? _program;
+  static Future<FragmentProgram>? _programFuture;
+
+  static FragmentProgram? get cachedProgram => _program;
+
+  static Future<FragmentProgram> load() {
+    final cached = _program;
+    if (cached != null) {
+      return Future.value(cached);
+    }
+
+    return _programFuture ??= _load();
+  }
+
+  static Future<FragmentProgram> _load() async {
+    try {
+      final program = await FragmentProgram.fromAsset(_shaderAsset);
+      _program = program;
+      return program;
+    } catch (_) {
+      _programFuture = null;
+      rethrow;
+    }
+  }
 }
 
 /// Container widget that manages multiple liquid glass shapes and applies the shader effect.
@@ -130,21 +164,46 @@ class OCLiquidGlassGroup extends StatefulWidget {
     this.repaint,
   });
 
+  /// Loads and caches the liquid glass shader before the first glass widget is
+  /// shown. This avoids a visible delay for transient widgets such as toasts.
+  static Future<void> precacheShader() async {
+    await _OCLiquidGlassShaderCache.load();
+  }
+
   @override
   State<OCLiquidGlassGroup> createState() => _OCLiquidGlassGroupState();
 }
 
 class _OCLiquidGlassGroupState extends State<OCLiquidGlassGroup> {
-  FragmentProgram? _program; // Compiled shader program from the .frag file
+  FragmentProgram? _program = _OCLiquidGlassShaderCache.cachedProgram;
 
   @override
   void initState() {
     super.initState();
-    // Asynchronously load and compile the fragment shader from assets
-    // The shader file contains the GLSL code that creates the glass effect
-    FragmentProgram.fromAsset(
-      'packages/oc_liquid_glass/shaders/liquid_glass.frag',
-    ).then((p) => setState(() => _program = p));
+    if (_program != null) {
+      return;
+    }
+
+    _OCLiquidGlassShaderCache.load().then(
+      (program) {
+        if (!mounted) {
+          return;
+        }
+        setState(() {
+          _program = program;
+        });
+      },
+      onError: (Object error, StackTrace stackTrace) {
+        FlutterError.reportError(
+          FlutterErrorDetails(
+            exception: error,
+            stack: stackTrace,
+            library: 'oc_liquid_glass',
+            context: ErrorDescription('loading the liquid glass shader'),
+          ),
+        );
+      },
+    );
   }
 
   @override
@@ -381,7 +440,14 @@ class _RenderLiquidGlassGroup extends RenderProxyBox {
           ? maxRadius 
           : shape.borderRadius;
 
-      shapes.add(ShapeData(rect.center, rect.size, clampedRadius, shape.color));
+      shapes.add(
+        ShapeData(
+          rect.center,
+          rect.size,
+          clampedRadius,
+          shape.color,
+        ),
+      );
     }
 
     // If no shapes are registered, skip rendering
@@ -442,7 +508,12 @@ class _RenderLiquidGlassGroup extends RenderProxyBox {
       
       // Anti-aliasing and shape count
       ..setFloat(idx++, 1.0 * _devicePixelRatio) // 1px anti-aliasing
-      ..setFloat(idx++, shapes.length.toDouble()); // Number of shapes
+      ..setFloat(
+        idx++,
+        shapes.length > maxRects
+            ? maxRects.toDouble()
+            : shapes.length.toDouble(),
+      ); // Number of shapes
 
     // STEP 3: Pass individual shape data to shader (max 4 shapes supported)
     for (var i = 0; i < shapes.length && i < maxRects; i++) {
@@ -460,12 +531,12 @@ class _RenderLiquidGlassGroup extends RenderProxyBox {
         ;
     }
 
-    // STEP 4: Apply the shader as a backdrop filter
-    // This creates a layer that processes the background through the shader
+    // STEP 4: Apply the shader as a backdrop filter and paint the child inside
+    // the layer. This keeps opacity/fade animations in sync with the backdrop.
+    // If this is clipped for performance later, inflate the clip by the shader's
+    // refraction sample reach or edge pixels will clamp during strong refraction.
     context.pushLayer(
-      BackdropFilterLayer(
-        filter: ImageFilter.shader(sh), // Apply our glass shader
-      ),
+      BackdropFilterLayer(filter: ImageFilter.shader(sh)),
       super.paint,
       offset,
     );
@@ -494,6 +565,7 @@ class _RenderLiquidGlassGroup extends RenderProxyBox {
     //   clipBehavior: Clip.antiAlias,
     // );
   }
+
 }
 
 /// Widget that wraps any child to make it appear as a liquid glass droplet.
